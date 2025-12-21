@@ -5,5 +5,6 @@ export interface Resume {
     yearsOfExperience?: number; // in years
     skills?: string[]; // list of skills
     location?: string; // candidate location
+    roleType?: string; // e.g., frontend, backend, fullstack
   };
 }
