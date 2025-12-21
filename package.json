@@ -22,6 +22,7 @@
   "homepage": "https://github.com/tusharagrawal3011/Resume_Matcher#readme",
   "dependencies": {
     "bullmq": "^5.66.2",
+    "crypto": "^1.0.1",
     "express": "^5.2.1",
     "ioredis": "^5.8.2",
     "mongodb": "^7.0.0",
