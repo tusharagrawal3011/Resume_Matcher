@@ -43,7 +43,7 @@ router.post("/match", async (_req, res) => {
     content: "Looking for backend engineer with Node.js and distributed systems experience"
   };
 
-  const useCase = await createMatchResumesUseCase(resumes);
+  const useCase = await createMatchResumesUseCase();
 
   const result = await useCase.execute({
     job,
