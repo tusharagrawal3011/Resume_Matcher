@@ -22,6 +22,7 @@
   "homepage": "https://github.com/tusharagrawal3011/Resume_Matcher#readme",
   "dependencies": {
     "express": "^5.2.1",
+    "mongodb": "^7.0.0",
     "yarn": "^1.22.22"
   },
   "devDependencies": {
