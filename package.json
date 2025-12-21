@@ -23,9 +23,11 @@
   "dependencies": {
     "bullmq": "^5.66.2",
     "crypto": "^1.0.1",
+    "dotenv": "^8.2.0",
     "express": "^5.2.1",
     "ioredis": "^5.8.2",
     "mongodb": "^7.0.0",
+    "node-fetch": "^3.3.2",
     "yarn": "^1.22.22"
   },
   "devDependencies": {

@@ -32,9 +32,7 @@ export class MongoDBVectorSearchProvider implements VectorSearchProvider {
         }
       }
     ];
-    console.log("MongoDB Vector Search Pipeline:", JSON.stringify(pipeline, null, 2));
     const results = await collection.aggregate(pipeline).toArray();
-    console.log("MongoDB Vector Search Results:", results);
     return results.map(r => ({
       id: r.resumeId,
       score: r.score
