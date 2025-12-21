@@ -4,6 +4,8 @@ import { LLMProvider } from "../interfaces/llmProvider";
 import { MatchResumesInput, MatchResumesOutput } from "./matchResumesTypes";
 import { CandidateMatch } from "../domain/candidateMatch";
 
+const MIN_LLM_SCORE = 0.4; // hard rejection threshold
+
 export class MatchResumesUseCase {
   constructor(
     private readonly embeddingProvider: EmbeddingProvider,
@@ -12,42 +14,41 @@ export class MatchResumesUseCase {
   ) {}
 
   async execute(input: MatchResumesInput): Promise<MatchResumesOutput> {
-    const { job, resumes, topK = 50 } = input;
+    const { job, resumes, topK = 3 } = input;
 
-    // 1️⃣ Embed Job Description
+    // Embed JD
     const jobEmbedding = await this.embeddingProvider.embed(job.content);
 
-    // 2️⃣ Semantic retrieval (reduce problem size)
+    // Retrieve candidates semantically
     const retrieved = await this.vectorSearchProvider.search(
       jobEmbedding,
       Math.min(topK, resumes.length)
     );
 
-    // Create lookup map for resumes
-    const resumeMap = new Map(
-      resumes.map((r) => [r.id, r]) // assuming Resume has an 'id' field
-    );
+    const resumeMap = new Map(resumes.map(r => [r.id, r]));
+    const matches: CandidateMatch[] = [];
 
-    const matches: CandidateMatch[] = []; // to hold final matches
-
-    // 3️⃣ Deep comparison using LLM (only on shortlisted resumes)
+    //  LLM comparison
     for (const candidate of retrieved) {
       const resume = resumeMap.get(candidate.id);
       if (!resume) continue;
 
-      const comparison = await this.llmProvider.compare(
+      const result = await this.llmProvider.compare(
         job.content,
         resume.content
       );
 
+      // reject weak candidates
+      if (result.score < MIN_LLM_SCORE) continue;
+
       matches.push({
         resumeId: resume.id,
-        score: comparison.score,
-        explanation: comparison.explanation
+        score: result.score,
+        explanation: result.explanation
       });
     }
 
-    // 4️⃣ Rank by score (descending)
+    // Final ranking (only valid candidates remain)
     matches.sort((a, b) => b.score - a.score);
 
     return { matches };

@@ -32,22 +32,22 @@ Resume:
 ${resume}
 `;
 
-    const response = await fetch(this.endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: this.model,
-        prompt,
-        stream: false
-      })
-    });
+ const response = await fetch(this.endpoint, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: this.model,
+    prompt,
+    stream: false,
+    format: "json"   // 🔥 THIS IS THE KEY
+  })
+});
 
     if (!response.ok) {
       throw new Error("Ollama LLM request failed");
     }
 
     const data = await response.json();
-
     const parsed = extractJson(data.response);
 
     return {
