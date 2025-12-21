@@ -20,11 +20,10 @@ router.post("/match", async (_req, res) => {
   const result = await useCase.execute({
     job,
     resumes,
-    topK: 2
+    topK: 3
   });
 
   res.json(result);
 });
-
 
 export default router;

@@ -21,11 +21,7 @@ export class LocalVectorSearchProvider implements VectorSearchProvider {
       score: cosineSimilarity(queryVector, item.vector)
     }));
 
-    console.log(
-  "VECTOR SEARCH SCORES:",
-  scored.map(s => ({ id: s.id, score: s.score }))
-);
-
+    // NOTE: retrieval ≠ selection
     return scored
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
