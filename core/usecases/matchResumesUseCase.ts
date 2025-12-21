@@ -3,8 +3,7 @@ import { VectorSearchProvider } from "../interfaces/vectorSearchProvider";
 import { LLMProvider } from "../interfaces/llmProvider";
 import { MatchResumesInput, MatchResumesOutput } from "./matchResumesTypes";
 import { CandidateMatch } from "../domain/candidateMatch";
-
-const MIN_LLM_SCORE = 0.4; // hard rejection threshold
+import { MatchEvaluator } from "../../services/matchEvaluator";
 
 export class MatchResumesUseCase {
   constructor(
@@ -27,6 +26,7 @@ export class MatchResumesUseCase {
 
     const resumeMap = new Map(resumes.map(r => [r.id, r]));
     const matches: CandidateMatch[] = [];
+    const evaluator = new MatchEvaluator();
 
     //  LLM comparison
     for (const candidate of retrieved) {
@@ -38,14 +38,19 @@ export class MatchResumesUseCase {
         resume.content
       );
 
-      // reject weak candidates
-      if (result.score < MIN_LLM_SCORE) continue;
-
-      matches.push({
-        resumeId: resume.id,
-        score: result.score,
-        explanation: result.explanation
+      const evaluation = evaluator.evaluate({
+         vectorScore: candidate.score,
+         llmScore: result.score
       });
+
+       if (evaluation.decision !== "REJECTED") {
+    matches.push({
+      resumeId: resume.id,
+      score: evaluation.finalScore,
+      decision: evaluation.decision,
+      explanation: result.explanation
+    });
+  }
     }
 
     // Final ranking (only valid candidates remain)
