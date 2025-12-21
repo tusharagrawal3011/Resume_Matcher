@@ -1,12 +1,15 @@
 import { MatchResumesUseCase } from "../../core/usecases/matchResumesUseCase";
-import { OllamaEmbeddingProvider } from "../../infrastructure/llm/ollamaEmbeddingProvider";
 import { OllamaLLMProvider } from "../../infrastructure/llm/ollamaLlmProvider";
-import { Resume } from "../../core/domain/resume";
+import { CachedEmbeddingProvider } from "../../infrastructure/llm/cachedEmbeddingProvider";
 import { MongoDBVectorSearchProvider } from "../../infrastructure/vectorStore/mongodbVectorSearchProvider";
+import { CachedVectorSearchProvider } from "../../infrastructure/vectorStore/cachedVectorSearchedProvider";
 
-export async function createMatchResumesUseCase(resumes: Resume[]) {
-  const embeddingProvider = new OllamaEmbeddingProvider();
-  const vectorStore = new MongoDBVectorSearchProvider();
+export async function createMatchResumesUseCase() {
+const embeddingProvider = new CachedEmbeddingProvider();
+
+const vectorStore = new CachedVectorSearchProvider(
+  new MongoDBVectorSearchProvider()
+);
 
   return new MatchResumesUseCase(
     embeddingProvider,
