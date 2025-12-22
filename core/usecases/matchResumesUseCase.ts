@@ -1,9 +1,13 @@
 import { EmbeddingProvider } from "../interfaces/embeddingProvider";
 import { VectorSearchProvider } from "../interfaces/vectorSearchProvider";
 import { LLMProvider } from "../interfaces/llmProvider";
-import { MatchResumesInput, MatchResumesOutput } from "./matchResumesTypes";
+import {
+  MatchResumesInput,
+  MatchResumesOutput
+} from "./matchResumesTypes";
 import { CandidateMatch } from "../domain/candidateMatch";
 import { MatchEvaluator } from "../../services/matchEvaluator";
+import { ConcurrencyLimiter } from "../../shared/concurrency/concurrencyLimiter";
 
 export class MatchResumesUseCase {
   constructor(
@@ -12,7 +16,9 @@ export class MatchResumesUseCase {
     private readonly llmProvider: LLMProvider
   ) {}
 
-  async execute(input: MatchResumesInput): Promise<MatchResumesOutput> {
+  async execute(
+    input: MatchResumesInput
+  ): Promise<MatchResumesOutput> {
     const { job, resumes, topK = 3 } = input;
 
     // Embed JD
@@ -24,36 +30,52 @@ export class MatchResumesUseCase {
       Math.min(topK, resumes.length)
     );
 
-    const resumeMap = new Map(resumes.map(r => [r.id, r]));
-    const matches: CandidateMatch[] = [];
+    const resumeMap = new Map(
+      resumes.map(r => [r.id, r])
+    );
+
     const evaluator = new MatchEvaluator();
+    const limiter = new ConcurrencyLimiter(3);
 
-    //  LLM comparison
-    for (const candidate of retrieved) {
-      const resume = resumeMap.get(candidate.id);
-      if (!resume) continue;
+    // Controlled parallel LLM evaluation
+    const tasks: Promise<CandidateMatch | null>[] =
+      retrieved.map(candidate =>
+        limiter.run(async () => {
+          const resume = resumeMap.get(candidate.id);
+          if (!resume) return null;
 
-      const result = await this.llmProvider.compare(
-        job.content,
-        resume.content
+          const llmResult = await this.llmProvider.compare(
+            job.content,
+            resume.content
+          );
+
+          const evaluation = evaluator.evaluate({
+            vectorScore: candidate.score,
+            llmScore: llmResult.score
+          });
+
+          if (evaluation.decision === "REJECTED") {
+            return null;
+          }
+
+          return {
+            resumeId: resume.id,
+            score: evaluation.finalScore,
+            decision: evaluation.decision,
+            explanation: llmResult.explanation
+          };
+        })
       );
 
-      const evaluation = evaluator.evaluate({
-         vectorScore: candidate.score,
-         llmScore: result.score
-      });
+    const resolved: (CandidateMatch | null)[] =
+      await Promise.all(tasks);
 
-       if (evaluation.decision !== "REJECTED") {
-    matches.push({
-      resumeId: resume.id,
-      score: evaluation.finalScore,
-      decision: evaluation.decision,
-      explanation: result.explanation
-    });
-  }
-    }
+    // Type-safe filtering
+    const matches: CandidateMatch[] = resolved.filter(
+      (m): m is CandidateMatch => m !== null
+    );
 
-    // Final ranking (only valid candidates remain)
+    // Final ranking
     matches.sort((a, b) => b.score - a.score);
 
     return { matches };
