@@ -6,3 +6,7 @@ export const ingestionQueue = new Queue("resume-ingestion", {
     port: 6379
   }
 });
+
+export async function closeIngestionQueue() {
+  await ingestionQueue.close();
+}
