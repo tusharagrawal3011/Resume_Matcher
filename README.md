@@ -153,6 +153,18 @@ Response:
 { "status": "ok" }
 ```
 
+## `GET /openapi.json`
+
+No auth required.
+
+Returns the OpenAPI specification JSON used by Swagger UI.
+
+## `GET /docs`
+
+No auth required.
+
+Interactive Swagger UI for API exploration and testing.
+
 ## `POST /ingest-resumes`
 
 Auth: required when `API_KEY` is configured.

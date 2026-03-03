@@ -1,10 +1,12 @@
 import "dotenv/config";
 import express from "express";
 import rateLimit from "express-rate-limit";
+import swaggerUi from "swagger-ui-express";
 import router from "./routes";
 import { createApiKeyMiddleware } from "./middleware/apiKeyAuth";
 import { toPositiveNumber } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import { openApiSpec } from "./docs/openapi";
 
 export function createApp() {
   const app = express();
@@ -14,6 +16,12 @@ export function createApp() {
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
+
+  app.get("/openapi.json", (_req, res) => {
+    res.json(openApiSpec);
+  });
+
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
   app.use(createApiKeyMiddleware());
 

@@ -23,6 +23,20 @@ test("GET /health is public", async () => {
   assert.equal(res.body.status, "ok");
 });
 
+test("GET /openapi.json returns OpenAPI spec", async () => {
+  const app = createSecuredApp();
+  const res = await request(app).get("/openapi.json");
+  assert.equal(res.status, 200);
+  assert.equal(res.body.openapi, "3.0.3");
+  assert.equal(res.body.info.title, "Resume Matcher API");
+});
+
+test("GET /docs is publicly accessible", async () => {
+  const app = createSecuredApp();
+  const res = await request(app).get("/docs");
+  assert.equal(res.status, 301);
+});
+
 test("POST /ingest-resumes requires API key", async () => {
   const app = createSecuredApp();
   const res = await request(app)
