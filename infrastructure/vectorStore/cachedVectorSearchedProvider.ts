@@ -9,15 +9,10 @@ const searchCache = new InMemoryCache<VectorSearchResult[]>(
   5 * 60 * 1000 // 5 minutes
 );
 
-export class CachedVectorSearchProvider
-  implements VectorSearchProvider {
-
+export class CachedVectorSearchProvider implements VectorSearchProvider {
   constructor(private readonly provider: VectorSearchProvider) {}
 
-  async search(
-    queryVector: number[],
-    topK: number
-  ): Promise<VectorSearchResult[]> {
+  async search(queryVector: number[], topK: number): Promise<VectorSearchResult[]> {
     const key = crypto
       .createHash("sha256")
       .update(JSON.stringify({ queryVector, topK }))

@@ -12,9 +12,7 @@ export type EvaluationResult = {
 
 export class MatchEvaluator {
   evaluate(input: EvaluationInput): EvaluationResult {
-    const finalScore =
-      (input.vectorScore * 0.6) +
-      (input.llmScore * 0.4);
+    const finalScore = input.vectorScore * 0.6 + input.llmScore * 0.4;
 
     if (finalScore >= 0.75) {
       return { finalScore, decision: "STRONG_MATCH" };

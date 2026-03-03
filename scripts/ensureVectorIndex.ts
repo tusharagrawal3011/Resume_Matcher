@@ -43,7 +43,7 @@ async function ensureVectorIndex() {
 
 ensureVectorIndex()
   .then(() => process.exit(0))
-  .catch(err => {
+  .catch((err) => {
     console.error("Failed to ensure indexes", err);
     process.exit(1);
   });

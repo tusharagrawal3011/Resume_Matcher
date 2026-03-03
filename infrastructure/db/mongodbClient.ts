@@ -31,3 +31,9 @@ export async function getResumeCollection() {
   const client = await getMongoClient();
   return client.db(DB_NAME).collection("resume_vectors");
 }
+
+export async function closeMongoClient() {
+  if (client) {
+    await client.close();
+  }
+}

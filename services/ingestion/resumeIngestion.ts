@@ -18,29 +18,33 @@ export class ResumeIngestionService {
   async ingest(items: ResumeIngestionItem[]) {
     const collection = await getResumeCollection();
 
-    await Promise.all(items.map(item => this.limiter.run(async () => {
-      const content = await this.resolveContent(item);
-      const embedding = await this.embeddingProvider.embed(content);
+    await Promise.all(
+      items.map((item) =>
+        this.limiter.run(async () => {
+          const content = await this.resolveContent(item);
+          const embedding = await this.embeddingProvider.embed(content);
 
-      await collection.updateOne(
-        { resumeId: item.id },
-        {
-          $set: {
-            resumeId: item.id,
-            content,
-            embedding,
-            skills: item.metadata?.skills ?? [],
-            yearsOfExperience: item.metadata?.yearsOfExperience ?? 0,
-            roleType: item.metadata?.roleType ?? "",
-            updatedAt: new Date()
-          },
-          $setOnInsert: {
-            createdAt: new Date()
-          }
-        },
-        { upsert: true }
-      );
-    })));
+          await collection.updateOne(
+            { resumeId: item.id },
+            {
+              $set: {
+                resumeId: item.id,
+                content,
+                embedding,
+                skills: item.metadata?.skills ?? [],
+                yearsOfExperience: item.metadata?.yearsOfExperience ?? 0,
+                roleType: item.metadata?.roleType ?? "",
+                updatedAt: new Date()
+              },
+              $setOnInsert: {
+                createdAt: new Date()
+              }
+            },
+            { upsert: true }
+          );
+        })
+      )
+    );
   }
 
   private async resolveContent(item: ResumeIngestionItem): Promise<string> {

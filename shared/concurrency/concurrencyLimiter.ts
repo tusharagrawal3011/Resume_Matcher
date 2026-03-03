@@ -7,7 +7,7 @@ export class ConcurrencyLimiter {
   async run<T>(task: () => Promise<T>): Promise<T> {
     // If limit reached, wait
     if (this.running >= this.limit) {
-      await new Promise<void>(resolve => {
+      await new Promise<void>((resolve) => {
         this.queue.push(resolve);
       });
     }

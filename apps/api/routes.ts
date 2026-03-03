@@ -9,7 +9,7 @@ const router = Router();
 function buildValidationError(error: ZodError) {
   return {
     error: "Invalid payload",
-    details: error.issues.map(issue => ({
+    details: error.issues.map((issue) => ({
       path: issue.path.join("."),
       message: issue.message
     }))

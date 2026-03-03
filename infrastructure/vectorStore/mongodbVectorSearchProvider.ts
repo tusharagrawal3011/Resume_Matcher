@@ -5,10 +5,7 @@ import {
 import { getResumeCollection } from "../db/mongodbClient";
 
 export class MongoDBVectorSearchProvider implements VectorSearchProvider {
-  async search(
-    queryVector: number[],
-    topK: number
-  ): Promise<VectorSearchResult[]> {
+  async search(queryVector: number[], topK: number): Promise<VectorSearchResult[]> {
     const collection = await getResumeCollection();
 
     const pipeline = [
@@ -30,7 +27,7 @@ export class MongoDBVectorSearchProvider implements VectorSearchProvider {
       }
     ];
     const results = await collection.aggregate(pipeline).toArray();
-    return results.map(r => ({
+    return results.map((r) => ({
       id: r.resumeId,
       score: r.score,
       content: r.content

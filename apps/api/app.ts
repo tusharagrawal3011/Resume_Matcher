@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import router from "./routes";
 import { createApiKeyMiddleware } from "./middleware/apiKeyAuth";
 import { toPositiveNumber } from "./config/env";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 
 export function createApp() {
   const app = express();
@@ -27,6 +28,8 @@ export function createApp() {
   );
 
   app.use("/", router);
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
   return app;
 }
