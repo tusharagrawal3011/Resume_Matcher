@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { InMemoryCache } from "../../shared/cache/inMemorycache";
 import {
+  VectorSearchOptions,
   VectorSearchProvider,
   VectorSearchResult
 } from "../../core/interfaces/vectorSearchProvider";
@@ -12,10 +13,14 @@ const searchCache = new InMemoryCache<VectorSearchResult[]>(
 export class CachedVectorSearchProvider implements VectorSearchProvider {
   constructor(private readonly provider: VectorSearchProvider) {}
 
-  async search(queryVector: number[], topK: number): Promise<VectorSearchResult[]> {
+  async search(
+    queryVector: number[],
+    topK: number,
+    options?: VectorSearchOptions
+  ): Promise<VectorSearchResult[]> {
     const key = crypto
       .createHash("sha256")
-      .update(JSON.stringify({ queryVector, topK }))
+      .update(JSON.stringify({ queryVector, topK, options }))
       .digest("hex");
 
     const cached = searchCache.get(key);
@@ -25,7 +30,7 @@ export class CachedVectorSearchProvider implements VectorSearchProvider {
     }
 
     console.log("[CACHE MISS] Vector search");
-    const results = await this.provider.search(queryVector, topK);
+    const results = await this.provider.search(queryVector, topK, options);
     searchCache.set(key, results);
 
     return results;

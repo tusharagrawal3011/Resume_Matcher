@@ -43,5 +43,6 @@ export const ingestResumesSchema = z.object({
 export const matchResumesSchema = z.object({
   job: jobSchema,
   resumes: z.array(resumeSchema).optional(),
+  resumeIds: z.array(z.string().min(1)).min(1).optional(),
   topK: z.number().int().positive().max(100).optional()
 });
