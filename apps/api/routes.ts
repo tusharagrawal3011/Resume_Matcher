@@ -3,6 +3,7 @@ import { createMatchResumesUseCase } from "./bootstrap";
 import { ingestionQueue } from "../../queues/ingestionQueue";
 import { Resume } from "../../core/domain/resume";
 import { JobDescription } from "../../core/domain/jobDescription";
+import { ResumeIngestionItem } from "../../services/ingestion/resumeIngestion";
 
 const router = Router();
 
@@ -16,6 +17,16 @@ function isResume(value: unknown): value is Resume {
   return isNonEmptyString(resume.id) && isNonEmptyString(resume.content);
 }
 
+function isResumeIngestionItem(value: unknown): value is ResumeIngestionItem {
+  if (!value || typeof value !== "object") return false;
+  const resume = value as ResumeIngestionItem;
+  if (!isNonEmptyString(resume.id)) return false;
+
+  const hasContent = isNonEmptyString(resume.content);
+  const hasPdf = isNonEmptyString(resume.pdfBase64);
+  return hasContent || hasPdf;
+}
+
 function isJob(value: unknown): value is JobDescription {
   if (!value || typeof value !== "object") return false;
   const job = value as JobDescription;
@@ -25,9 +36,13 @@ function isJob(value: unknown): value is JobDescription {
 router.post("/ingest-resumes", async (req, res) => {
   try {
     const resumes = req.body?.resumes;
-    if (!Array.isArray(resumes) || resumes.length === 0 || !resumes.every(isResume)) {
+    if (
+      !Array.isArray(resumes) ||
+      resumes.length === 0 ||
+      !resumes.every(isResumeIngestionItem)
+    ) {
       return res.status(400).json({
-        error: "Invalid payload. Expected { resumes: Resume[] } with non-empty id/content."
+        error: "Invalid payload. Each resume must include id and either content or pdfBase64."
       });
     }
 

@@ -1,6 +1,16 @@
+import "dotenv/config";
 import { MongoClient } from "mongodb";
 
-const MONGO_URI = process.env.MONGO_URI;
+function normalizeMongoUri(value: string | undefined): string | undefined {
+  if (!value) return value;
+  return value
+    .trim()
+    .replace(/;$/, "")
+    .replace(/^"(.*)"$/, "$1")
+    .replace(/^'(.*)'$/, "$1");
+}
+
+const MONGO_URI = normalizeMongoUri(process.env.MONGO_URI);
 const DB_NAME = "resume_matcher";
 
 let client: MongoClient;
