@@ -1,13 +1,17 @@
 import type { Buffer } from "buffer";
-
-const pdfParse = require("pdf-parse");
+import { PDFParse } from "pdf-parse";
 
 export async function parsePdf(buffer: Buffer): Promise<string> {
-  const data = await pdfParse(buffer);
+  const parser = new PDFParse({ data: buffer });
+  try {
+    const data = await parser.getText();
 
-  if (!data.text || data.text.trim().length === 0) {
-    throw new Error("Empty text extracted from PDF");
+    if (!data.text || data.text.trim().length === 0) {
+      throw new Error("Empty text extracted from PDF");
+    }
+
+    return data.text;
+  } finally {
+    await parser.destroy();
   }
-
-  return data.text;
 }
