@@ -83,6 +83,11 @@ const options: swaggerJsdoc.Options = {
           required: ["job"],
           properties: {
             job: { $ref: "#/components/schemas/JobDescription" },
+            resumeIds: {
+              type: "array",
+              description: "Optional list of resume IDs to scope vector search",
+              items: { type: "string" }
+            },
             resumes: {
               type: "array",
               items: { $ref: "#/components/schemas/ResumeInput" }
@@ -110,12 +115,48 @@ const options: swaggerJsdoc.Options = {
         },
         MatchResumesResponse: {
           type: "object",
-          required: ["matches"],
+          required: ["matches", "nonMatches"],
           properties: {
             matches: {
               type: "array",
               items: { $ref: "#/components/schemas/CandidateMatch" }
+            },
+            nonMatches: {
+              type: "array",
+              items: { $ref: "#/components/schemas/NonMatchFeedback" }
             }
+          }
+        },
+        NonMatchFeedback: {
+          type: "object",
+          required: ["resumeId", "score", "reason", "improvementSuggestions"],
+          properties: {
+            resumeId: { type: "string" },
+            score: { type: "number", minimum: 0, maximum: 1 },
+            reason: { type: "string" },
+            improvementSuggestions: {
+              type: "array",
+              items: { type: "string" }
+            }
+          }
+        },
+        IngestionStatusResponse: {
+          type: "object",
+          required: [
+            "jobId",
+            "state",
+            "failedReason",
+            "processedOn",
+            "finishedOn",
+            "durationMs"
+          ],
+          properties: {
+            jobId: { oneOf: [{ type: "string" }, { type: "number" }] },
+            state: { type: "string" },
+            failedReason: { type: "string", nullable: true },
+            processedOn: { type: "number", nullable: true },
+            finishedOn: { type: "number", nullable: true },
+            durationMs: { type: "number", nullable: true }
           }
         },
         ValidationError: {
@@ -221,6 +262,47 @@ const options: swaggerJsdoc.Options = {
             },
             "500": {
               description: "Server error",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/GenericError" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/ingest-resumes/{jobId}/status": {
+        get: {
+          summary: "Get ingestion job status",
+          tags: ["Ingestion"],
+          security: [{ ApiKeyAuth: [] }],
+          parameters: [
+            {
+              in: "path",
+              name: "jobId",
+              required: true,
+              schema: { type: "string" }
+            }
+          ],
+          responses: {
+            "200": {
+              description: "Current ingestion status",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/IngestionStatusResponse" }
+                }
+              }
+            },
+            "404": {
+              description: "Job not found",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/GenericError" }
+                }
+              }
+            },
+            "401": {
+              description: "Unauthorized",
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/GenericError" }

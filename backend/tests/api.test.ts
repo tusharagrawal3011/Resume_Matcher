@@ -37,6 +37,18 @@ test("GET /docs is publicly accessible", async () => {
   assert.equal(res.status, 301);
 });
 
+test("OPTIONS preflight returns CORS headers for allowed origin", async () => {
+  const app = createSecuredApp();
+  const res = await request(app)
+    .options("/ingest-resumes")
+    .set("Origin", "http://localhost:3001")
+    .set("Access-Control-Request-Method", "POST")
+    .set("Access-Control-Request-Headers", "content-type,x-api-key");
+
+  assert.equal(res.status, 204);
+  assert.equal(res.headers["access-control-allow-origin"], "http://localhost:3001");
+});
+
 test("POST /ingest-resumes requires API key", async () => {
   const app = createSecuredApp();
   const res = await request(app)
@@ -45,6 +57,16 @@ test("POST /ingest-resumes requires API key", async () => {
 
   assert.equal(res.status, 401);
   assert.equal(res.body.error, "Unauthorized");
+});
+
+test("GET /ingest-resumes/:jobId/status returns 404 for unknown job", async () => {
+  const app = createSecuredApp();
+  const res = await request(app)
+    .get("/ingest-resumes/non-existent-job/status")
+    .set("x-api-key", "test-api-key");
+
+  assert.equal(res.status, 404);
+  assert.equal(res.body.error, "Ingestion job not found");
 });
 
 test("POST /ingest-resumes validates payload with zod", async () => {

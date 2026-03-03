@@ -59,6 +59,7 @@ Required:
 Recommended:
 
 - `PORT`
+- `CORS_ALLOWED_ORIGINS`
 - `REQUIRE_API_KEY`
 - `API_KEY`
 - `RATE_LIMIT_WINDOW_MS`
@@ -69,6 +70,7 @@ Example:
 ```env
 MONGO_URI=mongodb+srv://user:password@cluster0.xxx.mongodb.net/?appName=Cluster0
 PORT=3000
+CORS_ALLOWED_ORIGINS=http://localhost:3001,http://127.0.0.1:3001
 REQUIRE_API_KEY=true
 API_KEY=your-secure-api-key
 RATE_LIMIT_WINDOW_MS=60000

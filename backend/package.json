@@ -31,6 +31,7 @@
   "homepage": "https://github.com/tusharagrawal3011/Resume_Matcher#readme",
   "dependencies": {
     "bullmq": "^5.66.2",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express-rate-limit": "^7.5.1",
     "express": "^5.2.1",
@@ -43,6 +44,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.0.3",
     "@types/supertest": "^6.0.3",
