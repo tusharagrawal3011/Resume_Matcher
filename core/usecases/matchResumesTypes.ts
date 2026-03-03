@@ -4,7 +4,7 @@ import { CandidateMatch } from "../domain/candidateMatch";
 
 export interface MatchResumesInput {
   job: JobDescription;
-  resumes: Resume[];
+  resumes?: Resume[];
   topK?: number;
 }
 

@@ -1,6 +1,7 @@
 export interface VectorSearchResult {
   id: string; // ID of the retrieved item
   score: number; // similarity score
+  content?: string; // optional retrieved content
 }
 
 /*

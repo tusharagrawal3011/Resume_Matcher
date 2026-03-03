@@ -18,16 +18,13 @@ export class MongoDBVectorSearchProvider implements VectorSearchProvider {
           path: "embedding",
           queryVector,
           numCandidates: 100,
-          limit: topK,
-          filter: {
-            roleType: "backend",
-            yearsOfExperience: { $gte: 2 }
-          }
+          limit: topK
         }
       },
       {
         $project: {
           resumeId: 1,
+          content: 1,
           score: { $meta: "vectorSearchScore" }
         }
       }
@@ -35,7 +32,8 @@ export class MongoDBVectorSearchProvider implements VectorSearchProvider {
     const results = await collection.aggregate(pipeline).toArray();
     return results.map(r => ({
       id: r.resumeId,
-      score: r.score
+      score: r.score,
+      content: r.content
     }));
   }
 }

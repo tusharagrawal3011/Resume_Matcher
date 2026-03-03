@@ -19,7 +19,10 @@ export class MatchResumesUseCase {
   async execute(
     input: MatchResumesInput
   ): Promise<MatchResumesOutput> {
-    const { job, resumes, topK = 3 } = input;
+    const { job, resumes = [], topK = 3 } = input;
+    const normalizedTopK = Number.isFinite(topK) && topK > 0
+      ? Math.floor(topK)
+      : 3;
 
     // Embed JD
     const jobEmbedding = await this.embeddingProvider.embed(job.content);
@@ -27,7 +30,7 @@ export class MatchResumesUseCase {
     // Retrieve candidates semantically
     const retrieved = await this.vectorSearchProvider.search(
       jobEmbedding,
-      Math.min(topK, resumes.length)
+      normalizedTopK
     );
 
     const resumeMap = new Map(
@@ -42,11 +45,12 @@ export class MatchResumesUseCase {
       retrieved.map(candidate =>
         limiter.run(async () => {
           const resume = resumeMap.get(candidate.id);
-          if (!resume) return null;
+          const resumeContent = resume?.content ?? candidate.content;
+          if (!resumeContent) return null;
 
           const llmResult = await this.llmProvider.compare(
             job.content,
-            resume.content
+            resumeContent
           );
 
           const evaluation = evaluator.evaluate({
@@ -59,7 +63,7 @@ export class MatchResumesUseCase {
           }
 
           return {
-            resumeId: resume.id,
+            resumeId: resume?.id ?? candidate.id,
             score: evaluation.finalScore,
             decision: evaluation.decision,
             explanation: llmResult.explanation
