@@ -1,0 +1,30 @@
+:root {
+  --bg-start: #f3f8fb;
+  --bg-mid: #e8f2f7;
+  --bg-end: #f7fbfd;
+  --text: #10242e;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--text);
+  font-family: var(--font-space-grotesk), "Trebuchet MS", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%, rgb(180 219 234 / 65%), transparent 28%),
+    radial-gradient(circle at 80% 8%, rgb(164 209 229 / 45%), transparent 32%),
+    linear-gradient(165deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
