@@ -42,12 +42,16 @@ Set required env values in Render:
 
 - `MONGO_URI`
 - `REDIS_URL` (recommended for hosted Redis)
+- `EMBEDDING_PROVIDER` (`ollama` or `gemini`)
+- `LLM_PROVIDER` (`ollama` or `gemini`)
+- `GEMINI_API_KEY` (when using Gemini)
+- `OLLAMA_BASE_URL` (when using Ollama)
 - `API_KEY`
 - `CORS_ALLOWED_ORIGINS` (include your Vercel frontend URL)
 
 Deploy command is managed by blueprint:
 
-- Build: `npm install && npm run build`
+- Build: `NODE_ENV=development npm ci --include=dev && npm run build`
 - API start: `npm run start`
 - Worker start: `npm run start:worker`
 
