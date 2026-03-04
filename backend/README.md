@@ -60,6 +60,7 @@ Recommended:
 
 - `PORT`
 - `CORS_ALLOWED_ORIGINS`
+- `REDIS_URL` (preferred in hosted setups) or `REDIS_HOST` + `REDIS_PORT`
 - `REQUIRE_API_KEY`
 - `API_KEY`
 - `RATE_LIMIT_WINDOW_MS`
@@ -71,6 +72,9 @@ Example:
 MONGO_URI=mongodb+srv://user:password@cluster0.xxx.mongodb.net/?appName=Cluster0
 PORT=3000
 CORS_ALLOWED_ORIGINS=http://localhost:3001,http://127.0.0.1:3001
+REDIS_URL=
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
 REQUIRE_API_KEY=true
 API_KEY=your-secure-api-key
 RATE_LIMIT_WINDOW_MS=60000
@@ -242,7 +246,7 @@ Optional `resumes` can be provided to override/augment content lookup:
 
 Preconditions:
 
-1. Redis running on `127.0.0.1:6379`
+1. Redis configured (`REDIS_URL` or `REDIS_HOST`/`REDIS_PORT`)
 2. Mongo reachable with valid `MONGO_URI`
 3. Ollama running with required models
 4. Worker and API both running
@@ -340,7 +344,7 @@ npm run start:worker
 
 ### Queue jobs stay pending
 
-- Redis not running on `6379`
+- Redis not reachable for configured `REDIS_URL` or `REDIS_HOST`/`REDIS_PORT`
 - Worker process not started
 
 ### `401 Unauthorized`
