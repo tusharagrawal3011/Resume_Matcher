@@ -1,0 +1,435 @@
+.card {
+  background: #ffffffee;
+  border: 1px solid #d9e3ea;
+  border-radius: 1rem;
+  padding: 1rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.card h2 {
+  font-size: 1.05rem;
+  color: #0e2b36;
+}
+
+.form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.fieldBlock {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.fieldLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #234452;
+}
+
+.helpText {
+  font-size: 0.8rem;
+  color: #4b6572;
+}
+
+.errorText {
+  font-size: 0.84rem;
+  color: #9f1239;
+}
+
+.successText {
+  font-size: 0.88rem;
+  color: #14532d;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  border: 1px solid #bfccd6;
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  background: #fbfeff;
+}
+
+.textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.primaryButton,
+.ghostButton,
+.removeButton {
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.primaryButton {
+  color: #f7fcff;
+  background: linear-gradient(110deg, #1f7a8c, #2f9db3);
+}
+
+.primaryButton:disabled {
+  filter: grayscale(0.4) brightness(0.92);
+  cursor: not-allowed;
+}
+
+.ghostButton,
+.removeButton {
+  border: 1px solid #bfd0db;
+  background: #f6fbff;
+  color: #1f3f4c;
+  padding: 0.42rem 0.65rem;
+}
+
+.filePanel {
+  border: 1px dashed #c5d5de;
+  border-radius: 0.75rem;
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.filePickerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.filePickerMeta {
+  font-size: 0.8rem;
+  color: #4f6571;
+}
+
+.fileInputHidden {
+  display: none;
+}
+
+.filePanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.fileList {
+  list-style: none;
+  display: grid;
+  gap: 0.42rem;
+  max-height: 150px;
+  overflow: auto;
+}
+
+.fileRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.84rem;
+}
+
+.skillInputWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  border: 1px solid #bfccd6;
+  border-radius: 0.65rem;
+  padding: 0.4rem;
+  background: #fbfeff;
+}
+
+.skillChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  background: #dbf3fb;
+  color: #115568;
+  font-size: 0.8rem;
+}
+
+.skillChip button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  font-size: 0.95rem;
+}
+
+.skillInput {
+  border: none;
+  outline: none;
+  padding: 0.35rem 0.25rem;
+  min-width: 180px;
+  flex: 1;
+  background: transparent;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.metricCard {
+  border: 1px solid #dce8ee;
+  border-radius: 0.75rem;
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.metricLabel {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #4f6570;
+}
+
+.metricValue {
+  font-size: 0.91rem;
+  font-weight: 600;
+  color: #173744;
+}
+
+.metric_success {
+  border-color: #9fe2bc;
+  background: #effcf5;
+}
+
+.metric_warning {
+  border-color: #f7d07f;
+  background: #fff8e8;
+}
+
+.metric_danger {
+  border-color: #f6a5a5;
+  background: #fff2f2;
+}
+
+.metric_info {
+  border-color: #9ed0ff;
+  background: #eef6ff;
+}
+
+.pipelineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.pipelineTitle {
+  font-weight: 700;
+  color: #173744;
+}
+
+.pipelinePercent {
+  font-size: 0.82rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  background: #e8f3f9;
+  color: #184254;
+  font-weight: 700;
+}
+
+.pipelineTrack {
+  width: 100%;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: #e4edf3;
+  overflow: hidden;
+}
+
+.pipelineFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 260ms ease;
+}
+
+.pipelineRunning {
+  background: linear-gradient(90deg, #1f7a8c, #2f9db3);
+}
+
+.pipelineDone {
+  background: linear-gradient(90deg, #2f855a, #38a169);
+}
+
+.pipelineFailed {
+  background: linear-gradient(90deg, #c53030, #e53e3e);
+}
+
+.pipelineDetail {
+  font-size: 0.84rem;
+  color: #405965;
+}
+
+.timelineMeta {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.82rem;
+  color: #4d6470;
+}
+
+.historyList,
+.resultsList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.historyItem,
+.resultItem {
+  border: 1px solid #dce6ed;
+  border-radius: 0.8rem;
+  padding: 0.85rem;
+  background: #f8fcff;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.historyItem h3,
+.resultTopRow h3 {
+  font-size: 1rem;
+}
+
+.resultTopRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 0.26rem 0.6rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.strongMatch {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.possibleMatch {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.rejectedMatch {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.progressWrap {
+  height: 0.5rem;
+  background: #e4edf3;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #1f7a8c, #2f9db3);
+}
+
+.score {
+  font-weight: 600;
+  color: #1f3a47;
+}
+
+.explanation {
+  color: #324f5c;
+  line-height: 1.4;
+}
+
+.pointList {
+  margin-left: 1rem;
+  display: grid;
+  gap: 0.2rem;
+  color: #2e4c5a;
+  font-size: 0.87rem;
+}
+
+.emptyState {
+  color: #516570;
+  font-size: 0.9rem;
+}
+
+.scopeCallout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border: 1px solid #c7dbeb;
+  border-radius: 0.7rem;
+  background: #eef7ff;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.82rem;
+  color: #274553;
+}
+
+.scopeCallout strong {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: #2f7fa4;
+  color: #fff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.7rem;
+  margin-top: 0.1rem;
+}
+
+.toastStack {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  gap: 0.45rem;
+  z-index: 30;
+}
+
+.toast {
+  min-width: 220px;
+  max-width: 360px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.65rem;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 18px rgb(25 41 51 / 18%);
+}
+
+.toastSuccess {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.toastError {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.toastInfo {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+@media (max-width: 980px) {
+  .twoCol,
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+}
