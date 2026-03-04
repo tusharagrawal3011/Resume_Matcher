@@ -1,8 +1,10 @@
-import { OllamaEmbeddingProvider } from "../../infrastructure/llm/ollamaEmbeddingProvider";
 import { getResumeCollection } from "../../infrastructure/db/mongodbClient";
 import { Resume } from "../../core/domain/resume";
 import { parsePdf } from "../../infrastructure/parser/pdfParser";
 import { ConcurrencyLimiter } from "../../shared/concurrency/concurrencyLimiter";
+import { EmbeddingProvider } from "../../core/interfaces/embeddingProvider";
+import { createEmbeddingProvider } from "../../infrastructure/llm/providerFactory";
+import { RetryingEmbeddingProvider } from "../../infrastructure/llm/retryingEmbeddingProvider";
 
 export type ResumeIngestionItem = {
   id: string;
@@ -12,8 +14,13 @@ export type ResumeIngestionItem = {
 };
 
 export class ResumeIngestionService {
-  private readonly embeddingProvider = new OllamaEmbeddingProvider();
+  private readonly embeddingProvider: EmbeddingProvider;
   private readonly limiter = new ConcurrencyLimiter(3);
+
+  constructor(embeddingProvider?: EmbeddingProvider) {
+    this.embeddingProvider =
+      embeddingProvider ?? new RetryingEmbeddingProvider(createEmbeddingProvider(), 2, 30_000);
+  }
 
   async ingest(items: ResumeIngestionItem[]) {
     const collection = await getResumeCollection();
