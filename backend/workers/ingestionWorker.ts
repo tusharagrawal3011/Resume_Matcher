@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { ResumeIngestionService } from "../services/ingestion/resumeIngestion";
 import { closeMongoClient } from "../infrastructure/db/mongodbClient";
+import { getRedisConnection } from "../queues/redisConnection";
 
 const ingestionService = new ResumeIngestionService();
 
@@ -12,10 +13,7 @@ const worker = new Worker(
     console.log("Ingestion job completed:", job.id);
   },
   {
-    connection: {
-      host: "127.0.0.1",
-      port: 6379
-    }
+    connection: getRedisConnection()
   }
 );
 

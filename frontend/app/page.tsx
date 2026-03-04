@@ -19,7 +19,7 @@ import { StatusOverview } from "@/components/StatusOverview";
 import { PipelineStepper } from "@/components/PipelineStepper";
 import { ToastItem, ToastStack } from "@/components/ToastStack";
 
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY?.trim() || "rm_local_dev_key_2026";
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY?.trim() ?? "";
 const INGESTION_WAIT_TIMEOUT_MS = 90_000;
 const INGESTION_POLL_INTERVAL_MS = 2_000;
 
