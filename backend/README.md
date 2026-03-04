@@ -3,7 +3,7 @@
 Production-oriented TypeScript backend for:
 
 - Resume ingestion (text or PDF base64)
-- Embedding generation with Ollama
+- Embedding generation with pluggable providers (Ollama or Gemini)
 - Vector storage/search with MongoDB Atlas Vector Search
 - LLM-assisted match scoring
 - Queue-based ingestion worker with Redis/BullMQ
@@ -17,8 +17,10 @@ Install these before running the project:
 1. Node.js `>=20` and npm
 2. Redis (local, Docker, or remote)
 3. MongoDB Atlas cluster with vector search support
-4. Ollama running locally on `http://127.0.0.1:11434`
-5. Ollama models:
+4. Choose one model provider setup:
+   - Ollama running locally or remotely on `http://127.0.0.1:11434` by default
+   - or Gemini API key (`GEMINI_API_KEY`)
+5. If using Ollama, required models:
    - Embedding model: `nomic-embed-text`
    - LLM model: `llama3`
 
@@ -61,9 +63,14 @@ Recommended:
 - `PORT`
 - `CORS_ALLOWED_ORIGINS`
 - `REDIS_URL` (preferred in hosted setups) or `REDIS_HOST` + `REDIS_PORT`
+- `EMBEDDING_PROVIDER` (`ollama` or `gemini`)
+- `LLM_PROVIDER` (`ollama` or `gemini`)
 - `OLLAMA_BASE_URL`
 - `OLLAMA_EMBED_MODEL`
 - `OLLAMA_LLM_MODEL`
+- `GEMINI_API_KEY`
+- `GEMINI_EMBED_MODEL`
+- `GEMINI_LLM_MODEL`
 - `REQUIRE_API_KEY`
 - `API_KEY`
 - `RATE_LIMIT_WINDOW_MS`
@@ -78,9 +85,14 @@ CORS_ALLOWED_ORIGINS=http://localhost:3001,http://127.0.0.1:3001
 REDIS_URL=
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
+EMBEDDING_PROVIDER=ollama
+LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_EMBED_MODEL=nomic-embed-text
 OLLAMA_LLM_MODEL=llama3
+GEMINI_API_KEY=
+GEMINI_EMBED_MODEL=gemini-embedding-001
+GEMINI_LLM_MODEL=gemini-2.5-flash
 REQUIRE_API_KEY=true
 API_KEY=your-secure-api-key
 RATE_LIMIT_WINDOW_MS=60000
@@ -97,7 +109,7 @@ Docker example:
 docker run -d --name resume-redis -p 6379:6379 redis:latest
 ```
 
-### 3.2 Start Ollama
+### 3.2 Start Ollama (only if provider is `ollama`)
 
 Run Ollama service and pull models:
 
@@ -254,7 +266,9 @@ Preconditions:
 
 1. Redis configured (`REDIS_URL` or `REDIS_HOST`/`REDIS_PORT`)
 2. Mongo reachable with valid `MONGO_URI`
-3. Ollama running with required models
+3. Selected model provider is reachable:
+   - for `ollama`: `OLLAMA_BASE_URL` and models available
+   - for `gemini`: valid `GEMINI_API_KEY`
 4. Worker and API both running
 
 ### Step 1: Ingest sample resumes
@@ -366,8 +380,10 @@ npm run start:worker
 
 ### Slow matching
 
-- Ollama model warmup can be slow on first request.
-- Check Ollama process and model availability.
+- If using Ollama, model warmup can be slow on first request.
+- Verify provider-specific connectivity:
+  - Ollama: check `OLLAMA_BASE_URL`
+  - Gemini: check `GEMINI_API_KEY` and quota
 
 ## 12. Project Scripts
 
