@@ -27,7 +27,8 @@ For backend setup details, see `backend/README.md`.
 Use:
 
 - `frontend/` on Vercel
-- `backend/` API + worker on Render
+- `backend/` API on Render
+- `backend/` worker on Render or Railway
 - MongoDB Atlas
 - Redis (Upstash or Render Redis)
 
@@ -68,3 +69,35 @@ Deploy `frontend/` as a separate project and set:
 2. Upload resumes
 3. Verify ingestion status reaches completed
 4. Run match and confirm results render
+
+## Current Status
+
+Phase 1 is complete and deployed:
+
+- Frontend live on Vercel
+- Backend API deployed on Render
+- Background worker deployed (queue processing enabled)
+- Redis-backed BullMQ ingestion pipeline active
+- Resume upload -> ingestion -> match flow working end-to-end
+- Provider-swappable AI architecture in place (`ollama` / `gemini` via env)
+
+## Planned Improvements (Phase 2)
+
+1. Observability and monitoring
+- Structured logging (request/job correlation)
+- Queue dashboard and job-level metrics
+- Better production error monitoring
+
+2. Caching and performance
+- Redis-based shared cache for expensive embedding/LLM calls
+- Result caching for repeated resume-JD match requests
+
+3. Reliability hardening
+- BullMQ retry + exponential backoff policies
+- Dead-letter flow for persistent failures
+- Better failure diagnostics and recovery paths
+
+4. Security and product maturity
+- Move from API-key-in-client to JWT-based auth
+- Better secret management and key rotation workflow
+- Recruiter workflow polish and run history UX
