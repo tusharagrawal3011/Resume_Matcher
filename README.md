@@ -1,103 +1,124 @@
-# Resume Matcher Monorepo
+# AI Resume Matcher
 
-This repository is split into:
+## Project Overview
+AI-powered recruiter workflow for resume ingestion, vector search, and explainable candidate ranking.
 
-- `backend/`: TypeScript API + worker + queue + vector search stack
-- `frontend/`: Next.js application (App Router)
+This monorepo includes:
+- `backend/`: TypeScript API + async worker + queue + vector search
+- `frontend/`: Next.js recruiter console
 
-## Quick Start
+## Live Demo
+- Frontend: `https://resume-matcher-five-mocha.vercel.app/`
+- Backend API: `https://resume-matcher-ze4y.onrender.com`
 
-1. Backend
-   - `cd backend`
-   - `npm install`
-   - `npm run dev:worker`
-   - in another terminal: `npm run dev:api`
-   - API docs: `http://127.0.0.1:3000/docs`
+## Quick System Walkthrough
+1. Recruiter uploads one or more resumes in the frontend.
+2. API accepts payload and enqueues an ingestion job in BullMQ.
+3. Worker processes jobs asynchronously (parse -> embed -> persist vectors).
+4. Job description is submitted for matching.
+5. Vector retrieval + LLM evaluation produce ranked candidates and feedback.
+6. Frontend renders scores, labels, explanations, and non-match improvements.
 
-2. Frontend
-   - `cd frontend`
-   - `npm install`
-   - `npm run dev`
-   - App: `http://127.0.0.1:3001` (or next available port)
+## Architecture Overview
+```text
+Frontend (Next.js - Vercel)
+        |
+        v
+Backend API (Node.js - Render)
+        |
+        v
+BullMQ Queue (Redis)
+        |
+        v
+Worker Service (Railway/Render)
+        |
+        v
+Embedding + LLM Processing (Gemini/Ollama)
+        |
+        v
+MongoDB Atlas Vector Search
+        |
+        v
+Ranked Candidate Results + Feedback
+```
 
-For backend setup details, see `backend/README.md`.
+The API handles ingestion and match requests, while heavy processing is done asynchronously in workers through BullMQ. Workers parse resumes, generate embeddings, persist vectors in MongoDB Atlas, and support provider-swappable AI evaluation (`ollama` or `gemini`) via environment configuration.
 
-## Phase 1 Deployment
+## System Design Highlights
+- Asynchronous processing with BullMQ workers for non-blocking ingestion.
+- Vector retrieval with MongoDB Atlas Vector Search.
+- Provider-swappable AI layer (`EMBEDDING_PROVIDER` / `LLM_PROVIDER`).
+- Caching wrappers for repeated embedding and retrieval operations.
+- Retry wrappers for embedding and LLM calls.
+- Distributed deployment across Vercel, Render, Railway, MongoDB Atlas, and Upstash Redis.
 
-Use:
+## Tech Stack
+- Frontend: Next.js, TypeScript
+- Backend: Node.js, Express, TypeScript, Zod
+- Queue: BullMQ + Redis
+- Data: MongoDB Atlas Vector Search
+- AI Providers: Gemini / Ollama
+- Hosting: Vercel + Render + Railway
 
-- `frontend/` on Vercel
-- `backend/` API on Render
-- `backend/` worker on Render or Railway
-- MongoDB Atlas
-- Redis (Upstash or Render Redis)
+## API Endpoints
+- `GET /health`
+- `GET /openapi.json`
+- `GET /docs`
+- `POST /ingest-resumes`
+- `GET /ingest-resumes/:jobId/status`
+- `POST /match`
 
-### 1. Backend deploy (Render)
+For full API schemas and examples, see `backend/README.md` and `/docs`.
 
-This repo includes [`render.yaml`](./render.yaml) with:
+## Setup Instructions
+### Local Quick Start
+1. Start backend:
+- `cd backend`
+- `npm install`
+- `npm run dev:worker`
+- in another terminal: `npm run dev:api`
+2. Start frontend:
+- `cd frontend`
+- `npm install`
+- `npm run dev`
 
-1. `resume-matcher-api` web service
-2. `resume-matcher-worker` background worker
+Local URLs:
+- Frontend: `http://127.0.0.1:3001`
+- Backend docs: `http://127.0.0.1:3000/docs`
 
-Set required env values in Render:
+## Deployment Notes (Phase 1)
+- Frontend on Vercel (`frontend/`)
+- Backend API on Render (`backend/`)
+- Worker on Render or Railway (`backend/`)
+- Redis via Upstash/Render Redis
+- MongoDB Atlas for vector storage
 
+Required backend envs include:
 - `MONGO_URI`
-- `REDIS_URL` (recommended for hosted Redis)
-- `EMBEDDING_PROVIDER` (`ollama` or `gemini`)
-- `LLM_PROVIDER` (`ollama` or `gemini`)
-- `GEMINI_API_KEY` (when using Gemini)
-- `OLLAMA_BASE_URL` (when using Ollama)
+- `REDIS_URL`
+- `EMBEDDING_PROVIDER`
+- `LLM_PROVIDER`
+- `GEMINI_API_KEY` (if Gemini)
+- `OLLAMA_BASE_URL` (if Ollama)
 - `API_KEY`
-- `CORS_ALLOWED_ORIGINS` (include your Vercel frontend URL)
+- `CORS_ALLOWED_ORIGINS`
 
-Deploy command is managed by blueprint:
-
-- Build: `NODE_ENV=development npm ci --include=dev && npm run build`
-- API start: `npm run start`
-- Worker start: `npm run start:worker`
-
-### 2. Frontend deploy (Vercel)
-
-Deploy `frontend/` as a separate project and set:
-
-- `NEXT_PUBLIC_API_BASE_URL=https://<your-render-api-domain>`
-- `NEXT_PUBLIC_API_KEY=<same backend API_KEY>`
-
-### 3. Post-deploy smoke test
-
-1. Open frontend URL
-2. Upload resumes
-3. Verify ingestion status reaches completed
-4. Run match and confirm results render
+Required frontend envs:
+- `NEXT_PUBLIC_API_BASE_URL`
+- `NEXT_PUBLIC_API_KEY`
 
 ## Current Status
-
 Phase 1 is complete and deployed:
-
-- Frontend live on Vercel
-- Backend API deployed on Render
-- Background worker deployed (queue processing enabled)
-- Redis-backed BullMQ ingestion pipeline active
-- Resume upload -> ingestion -> match flow working end-to-end
-- Provider-swappable AI architecture in place (`ollama` / `gemini` via env)
+- End-to-end flow works: upload -> queue -> process -> match.
+- Cloud deployment working across API, worker, DB, and Redis.
+- Provider-swappable backend is implemented and tested.
 
 ## Planned Improvements (Phase 2)
-
-1. Observability and monitoring
-- Structured logging (request/job correlation)
-- Queue dashboard and job-level metrics
-- Better production error monitoring
-
-2. Caching and performance
-- Redis-based shared cache for expensive embedding/LLM calls
-- Result caching for repeated resume-JD match requests
-
-3. Reliability hardening
-- BullMQ retry + exponential backoff policies
-- Dead-letter flow for persistent failures
-- Better failure diagnostics and recovery paths
-
-4. Security and product maturity
-- Move from API-key-in-client to JWT-based auth
-- Better secret management and key rotation workflow
-- Recruiter workflow polish and run history UX
+1. Observability:
+- Structured logs, queue dashboard, job metrics, error monitoring.
+2. Performance:
+- Redis shared caching for expensive embedding/LLM calls.
+3. Reliability:
+- BullMQ retries, backoff, and dead-letter handling.
+4. Security/Product:
+- JWT auth, stronger secrets lifecycle, richer recruiter workflows.
