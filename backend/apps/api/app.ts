@@ -45,6 +45,11 @@ function getAllowedOrigins(): string[] {
 
 export function createApp() {
   const app = express();
+
+  // Trust the first proxy hop (Render, Vercel, nginx, etc.)
+  // Required for express-rate-limit to read X-Forwarded-For correctly
+  app.set("trust proxy", 1);
+
   const allowedOrigins = getAllowedOrigins();
   const corsOptions: cors.CorsOptions = {
     origin(origin, callback) {
