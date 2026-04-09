@@ -109,7 +109,8 @@ test("POST /ingest-resumes returns 500 when queue enqueue fails", async () => {
       .send({ resumes: [{ id: "res-99", content: "sample resume" }] });
 
     assert.equal(res.status, 500);
-    assert.equal(res.body.error, "Failed to enqueue ingestion job");
+    assert.equal(res.body.code, "INTERNAL_ERROR");
+    assert.equal(res.body.error, "queue unavailable");
   } finally {
     mutableQueue.add = originalAdd;
   }
