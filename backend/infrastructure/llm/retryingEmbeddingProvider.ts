@@ -1,5 +1,6 @@
 import { EmbeddingProvider } from "../../core/interfaces/embeddingProvider";
 import { withTimeout } from "../../shared/utils/withTimeout";
+import { logger } from "../../shared/logger/logger";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -13,9 +14,9 @@ export class RetryingEmbeddingProvider implements EmbeddingProvider {
   ) {}
 
   async embed(text: string): Promise<number[]> {
-    let attempt = 0;
+    let lastError: unknown;
 
-    while (attempt <= this.maxRetries) {
+    for (let attempt = 1; attempt <= this.maxRetries + 1; attempt++) {
       try {
         return await withTimeout(
           this.provider.embed(text),
@@ -23,19 +24,16 @@ export class RetryingEmbeddingProvider implements EmbeddingProvider {
           "Embedding request timed out"
         );
       } catch (error) {
-        attempt++;
-
-        if (attempt > this.maxRetries) {
-          console.error("Embedding failed after retries:", (error as Error).message);
-          throw error;
+        lastError = error;
+        if (attempt <= this.maxRetries) {
+          const backoffMs = 1000 * attempt;
+          logger.warn({ attempt, backoffMs }, "Embedding retry");
+          await sleep(backoffMs);
         }
-
-        const backoffMs = 1000 * attempt;
-        console.warn(`Embedding retry ${attempt} after ${backoffMs}ms`);
-        await sleep(backoffMs);
       }
     }
 
-    throw new Error("Unreachable");
+    logger.error({ err: lastError }, "Embedding failed after all retries");
+    throw lastError;
   }
 }

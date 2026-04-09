@@ -3,6 +3,8 @@ import { createMatchResumesUseCase } from "./bootstrap";
 import { ingestionQueue } from "../../queues/ingestionQueue";
 import { ingestResumesSchema, matchResumesSchema } from "./schemas";
 import { ZodError } from "zod";
+import { toErrorResponse } from "../../shared/errors/AppError";
+import { logger } from "../../shared/logger/logger";
 
 const router = Router();
 
@@ -32,8 +34,8 @@ router.post("/ingest-resumes", async (req, res) => {
       jobId: job.id
     });
   } catch (error) {
-    console.error("Failed to enqueue ingestion job", error);
-    return res.status(500).json({ error: "Failed to enqueue ingestion job" });
+    logger.error({ err: error }, "Failed to enqueue ingestion job");
+    return res.status(500).json(toErrorResponse(error));
   }
 });
 
@@ -61,8 +63,8 @@ router.get("/ingest-resumes/:jobId/status", async (req, res) => {
       durationMs
     });
   } catch (error) {
-    console.error("Failed to fetch ingestion job status", error);
-    return res.status(500).json({ error: "Failed to fetch ingestion job status" });
+    logger.error({ err: error }, "Failed to fetch ingestion job status");
+    return res.status(500).json(toErrorResponse(error));
   }
 });
 
@@ -86,8 +88,8 @@ router.post("/match", async (req, res) => {
 
     return res.json(result);
   } catch (error) {
-    console.error("Failed to match resumes", error);
-    return res.status(500).json({ error: "Failed to match resumes" });
+    logger.error({ err: error }, "Failed to match resumes");
+    return res.status(500).json(toErrorResponse(error));
   }
 });
 

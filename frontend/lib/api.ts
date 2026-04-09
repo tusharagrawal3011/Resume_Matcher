@@ -6,9 +6,6 @@ import {
   UploadResponse
 } from "@/types/match";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://127.0.0.1:3000";
-
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -27,20 +24,10 @@ async function parseErrorResponse(response: Response) {
   }
 }
 
-function buildHeaders(apiKey: string) {
-  return {
-    "Content-Type": "application/json",
-    "x-api-key": apiKey
-  };
-}
-
-export async function uploadResumes(
-  payload: UploadRequest,
-  apiKey: string
-): Promise<UploadResponse> {
-  const response = await fetch(`${API_BASE_URL}/ingest-resumes`, {
+export async function uploadResumes(payload: UploadRequest): Promise<UploadResponse> {
+  const response = await fetch("/api/ingest-resumes", {
     method: "POST",
-    headers: buildHeaders(apiKey),
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
 
@@ -52,13 +39,10 @@ export async function uploadResumes(
   return response.json();
 }
 
-export async function matchResumes(
-  payload: MatchRequest,
-  apiKey: string
-): Promise<MatchResponse> {
-  const response = await fetch(`${API_BASE_URL}/match`, {
+export async function matchResumes(payload: MatchRequest): Promise<MatchResponse> {
+  const response = await fetch("/api/match", {
     method: "POST",
-    headers: buildHeaders(apiKey),
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
 
@@ -70,16 +54,8 @@ export async function matchResumes(
   return response.json();
 }
 
-export async function getIngestionStatus(
-  jobId: string | number,
-  apiKey: string
-): Promise<IngestionStatusResponse> {
-  const response = await fetch(`${API_BASE_URL}/ingest-resumes/${jobId}/status`, {
-    method: "GET",
-    headers: {
-      "x-api-key": apiKey
-    }
-  });
+export async function getIngestionStatus(jobId: string | number): Promise<IngestionStatusResponse> {
+  const response = await fetch(`/api/ingest-resumes/${jobId}/status`);
 
   if (!response.ok) {
     const details = await parseErrorResponse(response);

@@ -1,26 +1,30 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { InMemoryCache } from "../../shared/cache/inMemorycache";
 import { EmbeddingProvider } from "../../core/interfaces/embeddingProvider";
-
-const embeddingCache = new InMemoryCache<number[]>(
-  10 * 60 * 1000 // 10 minutes
-);
+import { logger } from "../../shared/logger/logger";
 
 export class CachedEmbeddingProvider implements EmbeddingProvider {
-  constructor(private readonly provider: EmbeddingProvider) {}
+  private readonly cache: InMemoryCache<number[]>;
+
+  constructor(
+    private readonly provider: EmbeddingProvider,
+    ttlMs = 10 * 60 * 1000
+  ) {
+    this.cache = new InMemoryCache<number[]>(ttlMs);
+  }
 
   async embed(text: string): Promise<number[]> {
     const key = crypto.createHash("sha256").update(text).digest("hex");
 
-    const cached = embeddingCache.get(key);
+    const cached = this.cache.get(key);
     if (cached) {
-      console.log("CACHE HIT JD embedding");
+      logger.debug("embedding cache hit");
       return cached;
     }
 
-    console.log("CACHE MISS JD embedding");
+    logger.debug("embedding cache miss");
     const embedding = await this.provider.embed(text);
-    embeddingCache.set(key, embedding);
+    this.cache.set(key, embedding);
 
     return embedding;
   }

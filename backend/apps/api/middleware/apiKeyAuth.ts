@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { logger } from "../../../shared/logger/logger";
 
 function toBoolean(value: string | undefined, defaultValue: boolean): boolean {
   if (!value) return defaultValue;
@@ -14,7 +15,7 @@ export function createApiKeyMiddleware() {
   }
 
   if (!configuredApiKey) {
-    console.warn("API_KEY is not configured. Auth is disabled.");
+    logger.warn("API_KEY is not configured. Auth is disabled.");
     return (_req: Request, _res: Response, next: NextFunction) => next();
   }
 

@@ -19,8 +19,10 @@ after(async () => {
 test("GET /health is public", async () => {
   const app = createSecuredApp();
   const res = await request(app).get("/health");
-  assert.equal(res.status, 200);
-  assert.equal(res.body.status, "ok");
+  // Health check pings live dependencies so status may be ok or degraded in CI
+  assert.ok([200, 503].includes(res.status));
+  assert.ok(["ok", "degraded"].includes(res.body.status));
+  assert.ok("dependencies" in res.body);
 });
 
 test("GET /openapi.json returns OpenAPI spec", async () => {
@@ -109,7 +111,8 @@ test("POST /ingest-resumes returns 500 when queue enqueue fails", async () => {
       .send({ resumes: [{ id: "res-99", content: "sample resume" }] });
 
     assert.equal(res.status, 500);
-    assert.equal(res.body.error, "Failed to enqueue ingestion job");
+    assert.equal(res.body.code, "INTERNAL_ERROR");
+    assert.equal(res.body.error, "queue unavailable");
   } finally {
     mutableQueue.add = originalAdd;
   }
