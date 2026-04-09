@@ -1,17 +1,21 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { InMemoryCache } from "../../shared/cache/inMemorycache";
 import {
   VectorSearchOptions,
   VectorSearchProvider,
   VectorSearchResult
 } from "../../core/interfaces/vectorSearchProvider";
-
-const searchCache = new InMemoryCache<VectorSearchResult[]>(
-  5 * 60 * 1000 // 5 minutes
-);
+import { logger } from "../../shared/logger/logger";
 
 export class CachedVectorSearchProvider implements VectorSearchProvider {
-  constructor(private readonly provider: VectorSearchProvider) {}
+  private readonly cache: InMemoryCache<VectorSearchResult[]>;
+
+  constructor(
+    private readonly provider: VectorSearchProvider,
+    ttlMs = 5 * 60 * 1000
+  ) {
+    this.cache = new InMemoryCache<VectorSearchResult[]>(ttlMs);
+  }
 
   async search(
     queryVector: number[],
@@ -23,15 +27,15 @@ export class CachedVectorSearchProvider implements VectorSearchProvider {
       .update(JSON.stringify({ queryVector, topK, options }))
       .digest("hex");
 
-    const cached = searchCache.get(key);
+    const cached = this.cache.get(key);
     if (cached) {
-      console.log("[CACHE HIT] Vector search");
+      logger.debug("vector search cache hit");
       return cached;
     }
 
-    console.log("[CACHE MISS] Vector search");
+    logger.debug("vector search cache miss");
     const results = await this.provider.search(queryVector, topK, options);
-    searchCache.set(key, results);
+    this.cache.set(key, results);
 
     return results;
   }
