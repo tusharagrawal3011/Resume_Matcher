@@ -1,5 +1,6 @@
 import { LLMComparisonResult, LLMProvider } from "../../core/interfaces/llmProvider";
 import { withTimeout } from "../../shared/utils/withTimeout";
+import { logger } from "../../shared/logger/logger";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -26,13 +27,13 @@ export class RetryingLLMProvider implements LLMProvider {
         lastError = error;
         if (attempt <= this.maxRetries) {
           const backoffMs = 1000 * attempt;
-          console.warn(`LLM retry ${attempt} after ${backoffMs}ms`);
+          logger.warn({ attempt, backoffMs }, "LLM retry");
           await sleep(backoffMs);
         }
       }
     }
 
-    console.error("LLM failed after retries:", (lastError as Error).message);
+    logger.error({ err: lastError }, "LLM failed after all retries");
     throw lastError;
   }
 }

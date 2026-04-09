@@ -1,6 +1,7 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { InMemoryCache } from "../../shared/cache/inMemorycache";
 import { EmbeddingProvider } from "../../core/interfaces/embeddingProvider";
+import { logger } from "../../shared/logger/logger";
 
 const embeddingCache = new InMemoryCache<number[]>(
   10 * 60 * 1000 // 10 minutes
@@ -14,11 +15,11 @@ export class CachedEmbeddingProvider implements EmbeddingProvider {
 
     const cached = embeddingCache.get(key);
     if (cached) {
-      console.log("CACHE HIT JD embedding");
+      logger.debug("embedding cache hit");
       return cached;
     }
 
-    console.log("CACHE MISS JD embedding");
+    logger.debug("embedding cache miss");
     const embedding = await this.provider.embed(text);
     embeddingCache.set(key, embedding);
 

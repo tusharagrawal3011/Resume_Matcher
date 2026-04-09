@@ -5,6 +5,7 @@ import rateLimit from "express-rate-limit";
 import swaggerUi from "swagger-ui-express";
 import router from "./routes";
 import { createApiKeyMiddleware } from "./middleware/apiKeyAuth";
+import { requestLogger } from "./middleware/requestLogger";
 import { toPositiveNumber } from "./config/env";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { openApiSpec } from "./docs/openapi";
@@ -37,6 +38,7 @@ export function createApp() {
     optionsSuccessStatus: 204
   };
 
+  app.use(requestLogger());
   app.use(cors(corsOptions));
   app.use(express.json({ limit: "10mb" }));
 

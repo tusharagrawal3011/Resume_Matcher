@@ -1,5 +1,6 @@
 import { EmbeddingProvider } from "../../core/interfaces/embeddingProvider";
 import { withTimeout } from "../../shared/utils/withTimeout";
+import { logger } from "../../shared/logger/logger";
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -26,13 +27,13 @@ export class RetryingEmbeddingProvider implements EmbeddingProvider {
         lastError = error;
         if (attempt <= this.maxRetries) {
           const backoffMs = 1000 * attempt;
-          console.warn(`Embedding retry ${attempt} after ${backoffMs}ms`);
+          logger.warn({ attempt, backoffMs }, "Embedding retry");
           await sleep(backoffMs);
         }
       }
     }
 
-    console.error("Embedding failed after retries:", (lastError as Error).message);
+    logger.error({ err: lastError }, "Embedding failed after all retries");
     throw lastError;
   }
 }
