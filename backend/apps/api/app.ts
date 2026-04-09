@@ -20,7 +20,10 @@ async function checkMongo(): Promise<void> {
 
 async function checkRedis(): Promise<void> {
   const conn = getRedisConnection();
-  const redis = "url" in conn && conn.url ? new IORedis(conn.url) : new IORedis(conn);
+  // Must pass the full connection options (including tls:{} for rediss://)
+  // not just the URL string, so TLS is negotiated correctly (same as BullMQ)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const redis = new IORedis(conn as any);
   try {
     await redis.ping();
   } finally {
