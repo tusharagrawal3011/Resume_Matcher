@@ -21,6 +21,7 @@ import { ToastItem, ToastStack } from "@/components/ToastStack";
 
 const INGESTION_WAIT_TIMEOUT_MS = 90_000;
 const INGESTION_POLL_INTERVAL_MS = 2_000;
+const INGESTION_WORKER_STALL_MS = 20_000; // warn if still "waiting" after this long
 
 function makeResumeId(file: File): string {
   const safeName = file.name.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
@@ -80,20 +81,14 @@ export default function Home() {
   async function pollIngestionStatus(jobId: string | number) {
     const token = ++pollTokenRef.current;
     const start = Date.now();
+    let stallWarned = false;
 
     while (Date.now() - start < INGESTION_WAIT_TIMEOUT_MS) {
       if (pollTokenRef.current !== token) return;
 
       try {
         const status = await getIngestionStatus(jobId);
-        setIngestionSummary((prev) =>
-          prev
-            ? {
-                ...prev,
-                status
-              }
-            : prev
-        );
+        setIngestionSummary((prev) => (prev ? { ...prev, status } : prev));
 
         if (status.state === "completed") {
           const duration = status.durationMs
@@ -107,6 +102,19 @@ export default function Home() {
           addToast("error", `Upload failed: ${status.failedReason ?? "unknown error"}`);
           return;
         }
+
+        // Warn once if job hasn't been picked up by a worker in time
+        if (
+          !stallWarned &&
+          (status.state === "waiting" || status.state === "delayed") &&
+          Date.now() - start > INGESTION_WORKER_STALL_MS
+        ) {
+          stallWarned = true;
+          addToast(
+            "error",
+            "Worker is not responding. The ingestion service may be down."
+          );
+        }
       } catch {
         addToast("error", "Unable to fetch upload status.");
         return;
@@ -115,7 +123,23 @@ export default function Home() {
       await new Promise((resolve) => setTimeout(resolve, INGESTION_POLL_INTERVAL_MS));
     }
 
-    addToast("info", "Upload is still processing. You can retry matching shortly.");
+    // Hard timeout — force the UI to reflect failure so it doesn't stay frozen
+    setIngestionSummary((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        status: {
+          ...prev.status,
+          jobId: prev.status?.jobId ?? jobId,
+          state: "failed",
+          failedReason: "Timed out waiting for the worker to process this upload.",
+          processedOn: prev.status?.processedOn ?? null,
+          finishedOn: prev.status?.finishedOn ?? null,
+          durationMs: null
+        }
+      };
+    });
+    addToast("error", "Processing timed out. Check that the worker service is running.");
   }
 
   async function handleUploadSubmit(payload: UploadSubmitPayload): Promise<UploadSubmitResult> {
