@@ -19,7 +19,6 @@ import { StatusOverview } from "@/components/StatusOverview";
 import { PipelineStepper } from "@/components/PipelineStepper";
 import { ToastItem, ToastStack } from "@/components/ToastStack";
 
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY?.trim() ?? "";
 const INGESTION_WAIT_TIMEOUT_MS = 90_000;
 const INGESTION_POLL_INTERVAL_MS = 2_000;
 
@@ -86,7 +85,7 @@ export default function Home() {
       if (pollTokenRef.current !== token) return;
 
       try {
-        const status = await getIngestionStatus(jobId, API_KEY);
+        const status = await getIngestionStatus(jobId);
         setIngestionSummary((prev) =>
           prev
             ? {
@@ -134,7 +133,7 @@ export default function Home() {
     );
 
     try {
-      const queued = await uploadResumes({ resumes }, API_KEY);
+      const queued = await uploadResumes({ resumes });
       const summary: IngestionSummary = {
         uploadId: String(++uploadCounterRef.current),
         uploadAt: Date.now(),
@@ -184,7 +183,7 @@ export default function Home() {
     setRunHistory((prev) => [run, ...prev]);
 
     try {
-      const status = await getIngestionStatus(payload.ingestionSummary.jobId, API_KEY);
+      const status = await getIngestionStatus(payload.ingestionSummary.jobId);
       setIngestionSummary((prev) => (prev ? { ...prev, status } : prev));
 
       if (status.state !== "completed") {
@@ -194,17 +193,14 @@ export default function Home() {
         throw new Error(`Upload is ${status.state}. Please wait for completion.`);
       }
 
-      const response = await matchResumes(
-        {
-          job: {
-            id: `job-${Date.now()}`,
-            content: payload.form.jobDescription
-          },
-          resumeIds: payload.uploadedResumeIds,
-          topK: payload.form.topK
+      const response = await matchResumes({
+        job: {
+          id: `job-${Date.now()}`,
+          content: payload.form.jobDescription
         },
-        API_KEY
-      );
+        resumeIds: payload.uploadedResumeIds,
+        topK: payload.form.topK
+      });
 
       const completedRun: MatchRun = {
         ...run,
